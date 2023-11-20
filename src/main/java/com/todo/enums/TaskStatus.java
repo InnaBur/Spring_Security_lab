@@ -1,4 +1,4 @@
-package com.todo;
+package com.todo.enums;
 
 public enum TaskStatus {
 

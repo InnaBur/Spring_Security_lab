@@ -1,6 +1,6 @@
 package com.todo.entities;
 
-import com.todo.TaskStatus;
+import com.todo.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,9 +23,9 @@ public class Task {
 
     private LocalDateTime time = LocalDateTime.now();
 
-//    @ManyToOne
-//    @JoinColumn(name="user_id");
-//    private UserEntity user;
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User userDetails;
 
     public Task() {
     }

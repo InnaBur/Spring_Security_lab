@@ -1,12 +1,13 @@
 package com.todo.services;
 
-import com.todo.TaskStatus;
+import com.todo.enums.TaskStatus;
 import com.todo.dto.TaskDto;
 import com.todo.entities.Task;
 import com.todo.exceptions.ImmutableException;
 import com.todo.exceptions.NotFoundException;
 import com.todo.mapper.TodoMapper;
 import com.todo.repository.TaskRepository;
+import com.todo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,10 +18,13 @@ import java.util.Optional;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+
+    private final UserRepository userRepository;
     private final TodoMapper todoMapper;
 
-    public TaskService(TaskRepository taskRepository, TodoMapper todoMapper) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository, TodoMapper todoMapper) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
         this.todoMapper = todoMapper;
     }
 
@@ -34,6 +38,16 @@ public class TaskService {
                 .map(todoMapper::taskToTaskDto)
                 .toList();
     }
+
+
+//    public List<TaskDto> getAllTasksByUser(Long userId) {
+//        validateUser(userId);
+//
+//        List<Task> tasks = taskRepository.findAll();
+//        return tasks.stream()
+//                .map(todoMapper::taskToTaskDto)
+//                .toList();
+//    }
 
     public Optional<Task> getById(Long id) {
         return taskRepository.findById(id);
@@ -89,4 +103,15 @@ public class TaskService {
         }
         return taskForUpdate.get();
     }
+
+//    private User validateUser(Long userId) {
+//        return userRepository.findById(userId)
+//                .orElseThrow(() -> new NotFoundException("User was not found"));
+//    }
+//
+//    private Task validateTaskByUser(Long userId, Long taskId) {
+//        return taskRepository.findOneTaskByUserId(taskId, userId)
+//                .orElseThrow(() -> new NotFoundException("Task was not found"));
+//    }
+
 }
