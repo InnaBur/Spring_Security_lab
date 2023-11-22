@@ -1,5 +1,6 @@
 package com.todo.services;
 
+import com.todo.entities.User;
 import com.todo.enums.TaskStatus;
 import com.todo.dto.TaskDto;
 import com.todo.entities.Task;
@@ -8,6 +9,7 @@ import com.todo.exceptions.NotFoundException;
 import com.todo.mapper.TodoMapper;
 import com.todo.repository.TaskRepository;
 import com.todo.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,10 +19,9 @@ import java.util.Optional;
 @Service
 public class TaskService {
 
-    private final TaskRepository taskRepository;
-
-    private final UserRepository userRepository;
-    private final TodoMapper todoMapper;
+    TaskRepository taskRepository;
+    UserRepository userRepository;
+    TodoMapper todoMapper;
 
     public TaskService(TaskRepository taskRepository, UserRepository userRepository, TodoMapper todoMapper) {
         this.taskRepository = taskRepository;
@@ -29,16 +30,36 @@ public class TaskService {
     }
 
     public Task createTask(TaskDto taskDto) {
-        return taskRepository.save(todoMapper.dtoToEntity(taskDto));
+        User user = getAuthUser();
+        Task task = todoMapper.dtoToEntity(taskDto);
+        task.setUser(user);
+        return taskRepository.save(task);
     }
 
+    public List<TaskDto> getAllUsersTasks() {
+        User user = getAuthUser();
+        List<Task> tasks =  taskRepository.findAllByUser(user);
+        return tasks.stream()
+                .map(todoMapper::taskToTaskDto)
+                .toList();
+    }
+
+    private String getAuthUsername() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("This user was not found"));
+        return user.getUsername();
+    }
+
+    private User getAuthUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("This user was not found"));
+    }
     public List<TaskDto> getAll() {
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
                 .map(todoMapper::taskToTaskDto)
                 .toList();
     }
-
 
 //    public List<TaskDto> getAllTasksByUser(Long userId) {
 //        validateUser(userId);
@@ -75,7 +96,6 @@ public class TaskService {
     }
 
 
-
     public void canselTask(Long id) {
 
         Task existingTask = getTaskIfExist(id);
@@ -90,6 +110,7 @@ public class TaskService {
         }
         taskRepository.deleteById(id);
     }
+
     private void throwImmutableException(Task existingTask) {
         if (existingTask.getTaskStatus().immutableStatus()) {
             throw new ImmutableException("Status " + existingTask.getTaskStatus() + " of this task is immutable");

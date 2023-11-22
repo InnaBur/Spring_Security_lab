@@ -69,4 +69,10 @@
 ////                .build();
 ////        return new InMemoryUserDetailsManager(user1, user2, admin);
 ////    }
+
+//   @Bean
+//    public UserDetailsService userDetailsService() {
+//        return username -> userRepository.findByUsername(username)
+//                .orElseThrow(() -> new NotFoundException("User not found"));
+//    }
 //}

@@ -25,7 +25,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name="user_id")
-    private User userDetails;
+    private User user;
 
     public Task() {
     }

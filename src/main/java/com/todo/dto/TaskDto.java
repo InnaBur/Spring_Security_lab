@@ -1,5 +1,7 @@
 package com.todo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.todo.entities.User;
 import com.todo.enums.TaskStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +16,6 @@ public class TaskDto {
     private String task;
     private TaskStatus taskStatus;
     private LocalDateTime time;
-    private String username;
+    @JsonIgnore
+    private User user;
 }

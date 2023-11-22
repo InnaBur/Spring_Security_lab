@@ -5,21 +5,35 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
+    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
-    private static final String SECRET_KEY = "ee1a936190758df6ae3c1794b0de903533c53db528e1550baf64598ab76b54b6";
+    private static final String SECRET_KEY = "skA+5dA0fBOd/dZsCidpRWR8LnfXHEfXCf6fNId0o8I=";
+//    String SECRET_KEY = Encoders.BASE64.encode(Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded());
+//    @Value("${jwt.secret}")
+//    private String SECRET_KEY;
+
+//    @Value("${jwt.exptime}")
+//    private String EXP_TIME;
+
+    public JwtService() throws NoSuchAlgorithmException {
+    }
     public String extractUsername(String token) {
         return extractClaim(token).getSubject();
     }
@@ -33,13 +47,13 @@ public class JwtService {
                 .builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.ES256)
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*24))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
+         String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
@@ -59,8 +73,14 @@ public class JwtService {
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+private void generateKey() {
+    SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    String secretString = Encoders.BASE64.encode(key.getEncoded());
 
+    logger.info("Secret key: " + secretString);
+}
 }

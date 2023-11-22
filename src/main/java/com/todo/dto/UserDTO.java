@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 public class UserDTO {
@@ -23,5 +25,5 @@ public class UserDTO {
     @Size(min=8, message="Password should have at least 8 characters")
     private String password;
 
-    private Roles role;
+    private Set<Roles> role;
 }

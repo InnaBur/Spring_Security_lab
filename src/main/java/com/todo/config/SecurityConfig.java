@@ -1,30 +1,18 @@
 package com.todo.config;
 
-import com.todo.exceptions.NotFoundException;
-import com.todo.repository.UserRepository;
 import com.todo.services.CustomUserDetailsService;
-import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -34,7 +22,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final JWTAuthenticationFilter jwtAuthFilter;
-    private final UserRepository userRepository;
 
 
     @Bean
@@ -47,12 +34,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/swagger-ui/**", "v3/api-docs/**", "/api/v1/auth/**")
                         .permitAll()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
 //                .authenticationProvider(authProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//                .httpBasic(withDefaults())
-//                .formLogin(withDefaults());
+//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .httpBasic(withDefaults())
+                .formLogin(withDefaults());
 
         return http.build();
     }
@@ -86,10 +72,10 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    @Bean
-    CustomUserDetailsService customUserDetailsService () {
-        return new CustomUserDetailsService(userRepository);
-    }
+//    @Bean
+//    CustomUserDetailsService customUserDetailsService () {
+//        return new CustomUserDetailsService();
+//    }
 
 //    @Bean
 //    public UserDetailsService userDetailsService() {

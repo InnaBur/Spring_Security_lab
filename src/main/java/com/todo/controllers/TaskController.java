@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -28,7 +30,6 @@ import java.util.Optional;
 @SecurityRequirement(name = "ToDoAPI")
 public class TaskController {
 
-    //securConte
 
     TaskService taskService;
     AuthService authService;
@@ -45,10 +46,6 @@ public class TaskController {
     @Operation(summary = "Gets task by ID", description = "Returns a task with the requested id")
     @GetMapping("/{id}")
     public ResponseEntity<Object> findById(@PathVariable Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("fffffff"));
-        //opt+enter
-        taskRepository.findByUserDetailsAndId(user, id);
 
         Optional<Task> taskOptional = taskService.getById(id);
         if (taskOptional.isEmpty()) {
@@ -57,8 +54,19 @@ public class TaskController {
         return ResponseEntity.ok(taskOptional.get());
     }
 
-    @Operation(summary = "Gets all tasks", description = "Returns all existing tasks")
+    @Operation(summary = "Get all users task", description = "Returns all  task with the requested id")
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
+    public ResponseEntity<Object> getAllUsersTasks() {
+
+        List<TaskDto> taskDto = taskService.getAllUsersTasks();
+
+        return ResponseEntity.ok(taskDto);
+    }
+
+    @Operation(summary = "Gets all tasks", description = "Returns all existing tasks")
+
+    @GetMapping("/{user_id}")
     protected ResponseEntity<List<TaskDto>> all() {
 
         List<TaskDto> taskDto = taskService.getAll();
@@ -84,8 +92,9 @@ public class TaskController {
 //        return ResponseEntity.ok(taskDto.findByOwner(authentication.getName()));
 //    }
     @Operation(summary = "Adds a new Task", description = "Adds a new task in database")
+    @PreAuthorize("hasRole('USER')")
     @PostMapping()
-    private ResponseEntity<Void> createPerson(@Valid @RequestBody TaskDto newTask, UriComponentsBuilder ucb) {
+    private ResponseEntity<Void> createTask(@Valid @RequestBody TaskDto newTask, UriComponentsBuilder ucb) {
         Task savedTask = taskService.createTask(newTask);
         URI locationOfNewTask = ucb
                 .path("tasks/{id}")
