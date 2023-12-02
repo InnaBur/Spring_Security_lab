@@ -1,12 +1,15 @@
 package com.todo.enums;
 
+import java.util.List;
+
 public enum TaskStatus {
 
     PLANNED {
         @Override
-        public TaskStatus nextStatus() {
-            return IN_PROGRESS;
+        public List<TaskStatus> nextStatus() {
+            return List.of(IN_PROGRESS, NOTIFIED, DONE, CANCELED);
         }
+
         @Override
         public boolean immutableStatus() {
             return false;
@@ -14,9 +17,10 @@ public enum TaskStatus {
     },
     IN_PROGRESS {
         @Override
-        public TaskStatus nextStatus() {
-            return NOTIFIED;
+        public List<TaskStatus> nextStatus() {
+            return List.of(NOTIFIED, DONE, CANCELED);
         }
+
         @Override
         public boolean immutableStatus() {
             return false;
@@ -24,11 +28,12 @@ public enum TaskStatus {
     },
     CANCELED {
         @Override
-        public TaskStatus nextStatus() {
-            return this;
+        public List<TaskStatus> nextStatus() {
+            return List.of(this);
         }
+
         public boolean immutableStatus() {
-            return  true;
+            return true;
         }
     },
     NOTIFIED {
@@ -38,22 +43,22 @@ public enum TaskStatus {
         }
 
         @Override
-        public TaskStatus nextStatus() {
-            return DONE;
+        public List<TaskStatus> nextStatus() {
+            return List.of(DONE, CANCELED);
         }
     },
     DONE {
         @Override
-        public TaskStatus nextStatus() {
-            return this;
+        public List<TaskStatus> nextStatus() {
+            return List.of(this);
         }
 
         public boolean immutableStatus() {
-            return  true;
+            return true;
         }
-    }
-    ;
+    };
 
-public abstract  boolean immutableStatus();
-    public abstract TaskStatus nextStatus();
+    public abstract boolean immutableStatus();
+
+    public abstract List<TaskStatus> nextStatus();
 }

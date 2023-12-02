@@ -1,8 +1,8 @@
 package com.todo.controllers;
 
 import com.todo.services.AuthService;
-import com.todo.config.AuthenticationRequest;
-import com.todo.config.AuthenticationResponse;
+import com.todo.security.AuthenticationRequest;
+import com.todo.security.AuthenticationResponse;
 import com.todo.dto.UserRegisterRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +29,4 @@ public class AuthenticationController {
 
     }
 
-    //service return token in auth
-    //save - db
 }

@@ -1,7 +1,6 @@
 package com.todo.services;
 
 import com.todo.entities.User;
-import com.todo.exceptions.NotFoundException;
 import com.todo.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,30 +18,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        return userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new NotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String username)  {
         return userRepository.findUserByUsername(username)
                 .map(user -> new User(user.getUserId(), user.getUsername(), user.getPassword(), user.getRole()))
-                .orElseThrow();
+                .orElseThrow(()-> new UsernameNotFoundException(""));
     }
-
-
-//
-//    public CustomUserDetailsService(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
-//
-//    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        return null;
-//    }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return username -> userRepository.findByUsername(username)
-//                .orElseThrow(() -> new NotFoundException("User not found"));
-//    }
 }
 
 

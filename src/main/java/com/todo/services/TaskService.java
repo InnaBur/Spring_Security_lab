@@ -1,5 +1,7 @@
 package com.todo.services;
 
+import com.todo.dto.TaskDtoRequest;
+import com.todo.dto.TaskDtoResponse;
 import com.todo.entities.User;
 import com.todo.enums.TaskStatus;
 import com.todo.dto.TaskDto;
@@ -9,29 +11,28 @@ import com.todo.exceptions.NotFoundException;
 import com.todo.mapper.TodoMapper;
 import com.todo.repository.TaskRepository;
 import com.todo.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+//@Service
+@Component
+@RequiredArgsConstructor
 public class TaskService {
 
-    TaskRepository taskRepository;
-    UserRepository userRepository;
-    TodoMapper todoMapper;
+    private final TaskRepository taskRepository;
+    private final  UserRepository userRepository;
+    private final  TodoMapper todoMapper;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository, TodoMapper todoMapper) {
-        this.taskRepository = taskRepository;
-        this.userRepository = userRepository;
-        this.todoMapper = todoMapper;
-    }
 
-    public Task createTask(TaskDto taskDto) {
+    public Task createTask(TaskDtoRequest taskDto) {
         User user = getAuthUser();
-        Task task = todoMapper.dtoToEntity(taskDto);
+        Task task = todoMapper.dtoRequestToEntity(taskDto);
         task.setUser(user);
         return taskRepository.save(task);
     }
@@ -44,11 +45,6 @@ public class TaskService {
                 .toList();
     }
 
-    private String getAuthUsername() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("This user was not found"));
-        return user.getUsername();
-    }
 
     private User getAuthUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -71,44 +67,47 @@ public class TaskService {
 //    }
 
     public Optional<Task> getById(Long id) {
-        return taskRepository.findById(id);
+        User user = getAuthUser();
+        return taskRepository.findByUserAndId(user, id);
     }
 
-    public void updateTask(Long id, TaskDto taskDto) {
+    public TaskDtoResponse updateTask(Long id, TaskDtoRequest taskDto) {
+        User user = getAuthUser();
+        Task existingTask = getTaskIfExist(user, id);
 
-        Task existingTask = getTaskIfExist(id);
-
-        Task toUpdate = todoMapper.dtoToEntity(taskDto);
+        Task toUpdate = todoMapper.dtoRequestToEntity(taskDto);
         existingTask.setTask(toUpdate.getTask());
-        existingTask.setTaskStatus(existingTask.getTaskStatus());
+        existingTask.setTaskStatus(changeStatus(taskDto, existingTask));
         existingTask.setTime(LocalDateTime.now());
         taskRepository.save(existingTask);
+        return todoMapper.taskToTaskDtoResponse(existingTask);
     }
 
 
-    public void updateStatus(Long id) {
-
-        Task existingTask = getTaskIfExist(id);
-
-        throwImmutableException(existingTask);
-        existingTask.setTaskStatus(existingTask.getTaskStatus().nextStatus());
-        taskRepository.save(existingTask);
-    }
+//    public void updateStatus(Long id) {
+//
+//        Task existingTask = getTaskIfExist(id);
+//
+//        throwImmutableException(existingTask);
+//        existingTask.setTaskStatus(existingTask.getTaskStatus().nextStatus());
+//        taskRepository.save(existingTask);
+//    }
 
 
     public void canselTask(Long id) {
-
-        Task existingTask = getTaskIfExist(id);
+        User user = getAuthUser();
+        Task existingTask = getTaskIfExist(user, id);
         throwImmutableException(existingTask);
         existingTask.setTaskStatus(TaskStatus.CANCELED);
         taskRepository.save(existingTask);
     }
 
     public void delete(Long id) {
-        if (!taskRepository.existsById(id)) {
+        User user = getAuthUser();
+        if (!taskRepository.existsByIdAndUser(id, user)) {
             throw new NotFoundException("Task was not found");
         }
-        taskRepository.deleteById(id);
+        taskRepository.deleteByIdAndUser(id, user);
     }
 
     private void throwImmutableException(Task existingTask) {
@@ -117,12 +116,25 @@ public class TaskService {
         }
     }
 
-    private Task getTaskIfExist(Long id) {
-        Optional<Task> taskForUpdate = taskRepository.findById(id);
+    private Task getTaskIfExist(User user, Long id) {
+        Optional<Task> taskForUpdate = taskRepository.findByUserAndId(user, id);
         if (taskForUpdate.isEmpty()) {
             throw new NotFoundException("Task was not found");
         }
         return taskForUpdate.get();
+    }
+
+    public TaskStatus changeStatus(TaskDtoRequest taskDtoRequest, Task existingTask) {
+
+        TaskStatus status = taskDtoRequest.getTaskStatus();
+        TaskStatus existingTaskStatus = existingTask.getTaskStatus();
+
+        if (status.equals(existingTaskStatus) || existingTaskStatus.nextStatus().contains(status)) {
+            return status;
+        } else {
+            throwImmutableException(existingTask);
+            return existingTaskStatus;
+        }
     }
 
 //    private User validateUser(Long userId) {

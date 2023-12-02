@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,16 +25,18 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("users")
-@RequiredArgsConstructor
+@EnableMethodSecurity
+//@RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
+//@Secured("ROLE_ADMIN")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class UserController {
 
     UserService userService;
-    AuthService authService;
 
-    UserRepository userRepository;
-
-    TaskRepository taskRepository;
-
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Operation(summary = "Gets user by ID", description = "Returns a user with the requested id")
     @GetMapping("/{user_id}")
@@ -43,6 +48,7 @@ public class UserController {
         }
         return ResponseEntity.ok(userOptional.get());
     }
+
 
     @Operation(summary = "Gets all users", description = "Returns all existing users")
     @GetMapping

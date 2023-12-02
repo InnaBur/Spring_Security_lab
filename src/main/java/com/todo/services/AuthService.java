@@ -1,11 +1,12 @@
 package com.todo.services;
 
-import com.todo.config.AuthenticationRequest;
-import com.todo.config.AuthenticationResponse;
-import com.todo.config.JwtService;
+import com.todo.security.AuthenticationRequest;
+import com.todo.security.AuthenticationResponse;
+import com.todo.security.JwtService;
 import com.todo.dto.UserRegisterRequestDTO;
 import com.todo.entities.User;
 import com.todo.enums.Roles;
+import com.todo.exceptions.NotFoundException;
 import com.todo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,7 +48,7 @@ public class AuthService {
                 )
         );
         var user = repository.findUserByUsername(request.getUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException("User not found"));
         var jwtToken = jwtService.generateToken(user.getUsername());
         return AuthenticationResponse.builder()
                 .token(jwtToken)

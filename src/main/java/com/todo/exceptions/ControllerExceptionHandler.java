@@ -17,6 +17,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(value = {UserNotFoundException.class})
+    public ResponseEntity<MyErrorMessage> userNotFoundException(UserNotFoundException ex) {
+        MyErrorMessage message = new MyErrorMessage(LocalDateTime.now(), HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+
+        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(value = {ValidateException.class})
     public ResponseEntity<MyErrorMessage> wrongData (ValidateException ex) {
