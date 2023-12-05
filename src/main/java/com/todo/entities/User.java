@@ -30,7 +30,7 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Set<Roles> role;;
+    private Set<Roles> role;
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {

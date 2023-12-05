@@ -18,11 +18,10 @@ public class UserDTO {
     private long userId;
 
     @NotNull
-
     private String username;
 
     @NotNull
-    @Size(min=8, message="Password should have at least 8 characters")
+//    @Size(min=2, message="user.password.invalid")
     private String password;
 
     private Set<Roles> role;

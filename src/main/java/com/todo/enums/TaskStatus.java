@@ -26,7 +26,7 @@ public enum TaskStatus {
             return false;
         }
     },
-    CANCELED {
+    CANCELED{
         @Override
         public List<TaskStatus> nextStatus() {
             return List.of(this);
@@ -36,7 +36,7 @@ public enum TaskStatus {
             return true;
         }
     },
-    NOTIFIED {
+    NOTIFIED{
         @Override
         public boolean immutableStatus() {
             return false;
@@ -47,7 +47,7 @@ public enum TaskStatus {
             return List.of(DONE, CANCELED);
         }
     },
-    DONE {
+    DONE{
         @Override
         public List<TaskStatus> nextStatus() {
             return List.of(this);
@@ -61,4 +61,15 @@ public enum TaskStatus {
     public abstract boolean immutableStatus();
 
     public abstract List<TaskStatus> nextStatus();
+
+
+//    private final String messageKey;
+//
+//    TaskStatus(String messageKey) {
+//        this.messageKey = messageKey;
+//    }
+//
+//    public String getMessageKey() {
+//        return messageKey;
+//    }
 }

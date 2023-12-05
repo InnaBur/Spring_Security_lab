@@ -21,9 +21,6 @@ public class JwtService {
     private static final String SECRET_KEY = "skA+5dA0fBOd/dZsCidpRWR8LnfXHEfXCf6fNId0o8I=";
     private final SecretKey secretKey;
 
-    @Value("${jwt.exptime}")
-    private long EXP_TIME;
-
     public JwtService() {
         this.secretKey = (SecretKey) getSignInKey();
     }
@@ -37,11 +34,13 @@ public class JwtService {
     }
 
     public String generateToken(String username) {
+
+        long EXP_TIME = 14400000;
         return Jwts
                 .builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000*24*60))
+                .expiration(new Date(System.currentTimeMillis() + EXP_TIME))
                 .signWith(secretKey)
                 .compact();
     }

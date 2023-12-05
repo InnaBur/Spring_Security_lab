@@ -1,23 +1,14 @@
 package com.todo.controllers;
 
-import com.todo.dto.TaskDto;
 import com.todo.dto.UserDTO;
-import com.todo.entities.Task;
 import com.todo.entities.User;
 import com.todo.exceptions.NotFoundException;
-import com.todo.repository.TaskRepository;
-import com.todo.repository.UserRepository;
-import com.todo.services.AuthService;
-import com.todo.services.TaskService;
 import com.todo.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +17,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("users")
 @EnableMethodSecurity
-//@RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
-//@Secured("ROLE_ADMIN")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class UserController {
 
@@ -44,11 +33,10 @@ public class UserController {
 
         Optional<User> userOptional = userService.getUserById(user_id);
         if (userOptional.isEmpty()) {
-            throw new NotFoundException("User was not found");
+            throw new NotFoundException("user.not.found");
         }
         return ResponseEntity.ok(userOptional.get());
     }
-
 
     @Operation(summary = "Gets all users", description = "Returns all existing users")
     @GetMapping

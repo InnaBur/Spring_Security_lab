@@ -8,6 +8,7 @@ import com.todo.dto.TaskDto;
 import com.todo.entities.Task;
 import com.todo.exceptions.ImmutableException;
 import com.todo.exceptions.NotFoundException;
+import com.todo.lokalise.LanguageDefiner;
 import com.todo.mapper.TodoMapper;
 import com.todo.repository.TaskRepository;
 import com.todo.repository.UserRepository;
@@ -26,19 +27,17 @@ import java.util.Optional;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final  UserRepository userRepository;
     private final  TodoMapper todoMapper;
 
 
-    public Task createTask(TaskDtoRequest taskDto) {
-        User user = getAuthUser();
+    public Task createTask(TaskDtoRequest taskDto, User user) {
         Task task = todoMapper.dtoRequestToEntity(taskDto);
         task.setUser(user);
+//        task.setLocalizedTaskStatus(taskDto.getTaskStatus().getMessageKey());
         return taskRepository.save(task);
     }
 
-    public List<TaskDto> getAllUsersTasks() {
-        User user = getAuthUser();
+    public List<TaskDto> getAllUsersTasks(User user) {
         List<Task> tasks =  taskRepository.findAllByUser(user);
         return tasks.stream()
                 .map(todoMapper::taskToTaskDto)
@@ -46,10 +45,7 @@ public class TaskService {
     }
 
 
-    private User getAuthUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException("This user was not found"));
-    }
+
     public List<TaskDto> getAll() {
         List<Task> tasks = taskRepository.findAll();
         return tasks.stream()
@@ -57,22 +53,11 @@ public class TaskService {
                 .toList();
     }
 
-//    public List<TaskDto> getAllTasksByUser(Long userId) {
-//        validateUser(userId);
-//
-//        List<Task> tasks = taskRepository.findAll();
-//        return tasks.stream()
-//                .map(todoMapper::taskToTaskDto)
-//                .toList();
-//    }
-
-    public Optional<Task> getById(Long id) {
-        User user = getAuthUser();
+    public Optional<Task> getById(Long id, User user) {
         return taskRepository.findByUserAndId(user, id);
     }
 
-    public TaskDtoResponse updateTask(Long id, TaskDtoRequest taskDto) {
-        User user = getAuthUser();
+    public Task updateTask(Long id, TaskDtoRequest taskDto, User user) {
         Task existingTask = getTaskIfExist(user, id);
 
         Task toUpdate = todoMapper.dtoRequestToEntity(taskDto);
@@ -80,46 +65,34 @@ public class TaskService {
         existingTask.setTaskStatus(changeStatus(taskDto, existingTask));
         existingTask.setTime(LocalDateTime.now());
         taskRepository.save(existingTask);
-        return todoMapper.taskToTaskDtoResponse(existingTask);
+        return existingTask;
     }
 
-
-//    public void updateStatus(Long id) {
-//
-//        Task existingTask = getTaskIfExist(id);
-//
-//        throwImmutableException(existingTask);
-//        existingTask.setTaskStatus(existingTask.getTaskStatus().nextStatus());
-//        taskRepository.save(existingTask);
-//    }
-
-
-    public void canselTask(Long id) {
-        User user = getAuthUser();
+    public void canselTask(Long id, User user) {
         Task existingTask = getTaskIfExist(user, id);
         throwImmutableException(existingTask);
         existingTask.setTaskStatus(TaskStatus.CANCELED);
         taskRepository.save(existingTask);
     }
 
-    public void delete(Long id) {
-        User user = getAuthUser();
+    public void delete(Long id, User user) {
         if (!taskRepository.existsByIdAndUser(id, user)) {
-            throw new NotFoundException("Task was not found");
+            throw new NotFoundException(LanguageDefiner.toLocale("exception.task.not.found"));
         }
         taskRepository.deleteByIdAndUser(id, user);
     }
 
     private void throwImmutableException(Task existingTask) {
         if (existingTask.getTaskStatus().immutableStatus()) {
-            throw new ImmutableException("Status " + existingTask.getTaskStatus() + " of this task is immutable");
+            throw new ImmutableException(LanguageDefiner.toLocale(
+                    "exception.immutable.status", existingTask.getTaskStatus().toString()));
         }
     }
 
     private Task getTaskIfExist(User user, Long id) {
         Optional<Task> taskForUpdate = taskRepository.findByUserAndId(user, id);
         if (taskForUpdate.isEmpty()) {
-            throw new NotFoundException("Task was not found");
+            throw new NotFoundException("exception.task.not.found");
         }
         return taskForUpdate.get();
     }
@@ -127,6 +100,7 @@ public class TaskService {
     public TaskStatus changeStatus(TaskDtoRequest taskDtoRequest, Task existingTask) {
 
         TaskStatus status = taskDtoRequest.getTaskStatus();
+
         TaskStatus existingTaskStatus = existingTask.getTaskStatus();
 
         if (status.equals(existingTaskStatus) || existingTaskStatus.nextStatus().contains(status)) {
@@ -136,15 +110,4 @@ public class TaskService {
             return existingTaskStatus;
         }
     }
-
-//    private User validateUser(Long userId) {
-//        return userRepository.findById(userId)
-//                .orElseThrow(() -> new NotFoundException("User was not found"));
-//    }
-//
-//    private Task validateTaskByUser(Long userId, Long taskId) {
-//        return taskRepository.findOneTaskByUserId(taskId, userId)
-//                .orElseThrow(() -> new NotFoundException("Task was not found"));
-//    }
-
 }

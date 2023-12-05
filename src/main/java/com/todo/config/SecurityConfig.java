@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
-//@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
     private final JWTAuthenticationFilter jwtAuthFilter;
@@ -36,7 +35,6 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/users/**", "/tasks/all").hasAuthority("ADMIN")
                         .requestMatchers("/tasks/**").hasAnyAuthority("ADMIN", "USER")
-//                        .requestMatchers("/users/**", "/tasks/all").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -53,4 +51,5 @@ public class SecurityConfig {
 
         return configuration.getAuthenticationManager();
     }
+
 }

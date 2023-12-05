@@ -34,4 +34,16 @@ public class AdminInitializer {
             userRepository.save(admin);
         }
     }
+
+//    @PostConstruct
+//    public void initializeUser() {
+//        if (!userRepository.existsByUsername("user")) {
+//            User user = new User();
+//            user.setUsername("user");
+//            user.setPassword(passwordEncoder.encode("user"));
+//            user.setRole(Collections.singleton(Roles.USER));
+//
+//            userRepository.save(user);
+//        }
+//    }
 }

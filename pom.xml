@@ -15,9 +15,6 @@
     <description>Todo project for Spring Boot</description>
     <properties>
         <java.version>21</java.version>
-<!--        <org.lombok.version>1.18.30</org.lombok.version>-->
-<!--        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>-->
-<!--        <org.lombok-mapstruct-binding.version>0.2.0</org.lombok-mapstruct-binding.version>-->
     </properties>
 
 
@@ -117,7 +114,10 @@
         <artifactId>mapstruct</artifactId>
         <version>1.5.5.Final</version>
     </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 
 
     </dependencies>

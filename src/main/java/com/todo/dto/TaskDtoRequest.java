@@ -3,6 +3,7 @@ package com.todo.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.todo.entities.User;
 import com.todo.enums.TaskStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,9 +17,16 @@ public class TaskDtoRequest {
     private long id;
 
     private String task;
+
+    @NotNull(message = "task.status.not.empty")
     private TaskStatus taskStatus;
     @JsonIgnore
     private LocalDateTime time;
     @JsonIgnore
     private User user;
+
+//    public void setTaskStatus(TaskStatus taskStatus) {
+//        this.taskStatus = TaskStatus.valueOf(taskStatus.toString().toUpperCase());
+//    }
+
 }
