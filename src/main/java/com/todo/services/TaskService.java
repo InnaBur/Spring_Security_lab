@@ -33,7 +33,6 @@ public class TaskService {
     public Task createTask(TaskDtoRequest taskDto, User user) {
         Task task = todoMapper.dtoRequestToEntity(taskDto);
         task.setUser(user);
-//        task.setLocalizedTaskStatus(taskDto.getTaskStatus().getMessageKey());
         return taskRepository.save(task);
     }
 
@@ -85,7 +84,7 @@ public class TaskService {
     private void throwImmutableException(Task existingTask) {
         if (existingTask.getTaskStatus().immutableStatus()) {
             throw new ImmutableException(LanguageDefiner.toLocale(
-                    "exception.immutable.status", existingTask.getTaskStatus().toString()));
+                    "exception.immutable.status", existingTask.getTaskStatus().toString())); //String.valueof
         }
     }
 

@@ -18,7 +18,7 @@ public class TaskDtoRequest {
 
     private String task;
 
-    @NotNull(message = "task.status.not.empty")
+    @NotNull
     private TaskStatus taskStatus;
     @JsonIgnore
     private LocalDateTime time;
